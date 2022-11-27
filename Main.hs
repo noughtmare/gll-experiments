@@ -157,10 +157,13 @@ best x0 y0 = norm x0 `best'` norm y0 where
   best' x SFail = x
   best' (SStep x) (SStep y) = SStep (x `best` y)
   best' (SRec x) (SRec y) = SRec (x `best` y)
-  best' (SRec (SStep x)) (SStep y) = SStep (SRec x `best` y)
-  best' (SStep x) (SRec (SStep y)) = SStep (x `best` SRec y)
-  best' (SRec x) y = y -- x `best` y
-  best' x (SRec y) = x -- `best` y
+  -- problem: 
+  -- !!!!!!!!
+  -- best' (SRec (SStep x)) (SStep y) = SStep (SRec x `best` y)
+  -- best' (SStep x) (SRec (SStep y)) = SStep (x `best` SRec y)
+  -- !!!!!!!!
+  best' (SRec x) y = SRec (x `best` y)
+  best' x (SRec y) = SRec (x `best` y)
 --  best' _ _ = error "Missing case in best"
 
 eval :: Steps a -> a
@@ -211,8 +214,6 @@ char _ _ = SFail
 parse :: G '[] a -> String -> Steps (a, String)
 parse = steps ENil
 
--- >>> parse arith "1+1"
--- [(1,"+1")]
-
 main :: IO ()
-main = print $ parse (Mu (VZ *> Lift (char '1') <|> (pure '2' <* Lift end))) "111"
+-- main = print $ parse (Mu (VZ *> Lift (char '1') <|> pure '2') <* Lift end) "111"
+main = print $ parse ((Lift (char '1') <|> pure '2') <* Lift end) "1"
